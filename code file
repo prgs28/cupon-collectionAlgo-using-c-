@@ -1,0 +1,141 @@
+#include<time.h>
+#include <math.h>
+using namespace std;
+#include<iostream>
+
+void printPowerSet(float prob[], int set_size)
+{
+    unsigned int pow_set_size = pow(2, set_size);
+    int counter, j;
+	int x;
+
+	int* ite = new int[ pow_set_size ];
+	for(int i=0;i<pow_set_size;i++)
+	ite[i]=0;
+	float* sum = new float[ pow_set_size ];
+	for(int i=0;i<pow_set_size;i++)
+	sum[i]=0.0;
+	float* value = new float[ pow_set_size ];
+	for(int i=0;i<pow_set_size;i++)
+	value[i]=0.0;
+
+    /*Run from counter 000..0 to 111..1*/
+    for(counter = 0; counter < pow_set_size; counter++)
+    {
+      for(j = 0; j < set_size; j++)
+       {
+          /* Check if jth bit in the counter is set
+             If set then pront jth element from set */
+          if(counter & (1<<j))
+		  {
+			    sum[counter]=sum[counter]+prob[j];
+				ite[counter]++;
+		  }
+		}
+		
+    }
+	
+
+	float result=1.0;
+	for(counter = 0; counter < pow_set_size-1; counter++)
+		{
+			if ((counter==0)||(sum[counter]==1))
+			{
+				value[counter]=0;
+			}
+			
+			else if(ite[counter]%2==0)
+			{
+				value[counter]= (1/(1-(sum[counter])));
+
+			}
+			else
+			{
+				value[counter]= (-1)*(1/(1-(sum[counter])));
+			}
+			
+			result=result+value[counter];
+
+		}
+	
+	cout<<"\n------------------------------------------------\ntheoretical estimated # of cupons: "<<fabs(result);
+	cout<<"\n------------------------------------------------\n";
+}
+
+
+int main()
+{
+	
+	int m;
+	float sum1=0.0;
+	float avg;
+	float set[100];
+	int iteration=0;
+	float sum=0.0;
+	int i;
+	int unique=0;
+	int seed;
+	float range[100]={0.0};
+	int status[100];
+	float prob[100]={1.0};
+	
+	cout<<"\nenter no. of cupons: ";
+	cin>>m;
+	cout<<"\nenter frequencies :";
+	for(int i=0;i<m;i++)
+	{
+		cin>>set[i];
+		sum=sum+set[i];
+	}
+	for(int i=0;i<m;i++)
+	{
+		prob[i]=float(set[i]/sum);
+		status[i]=0;
+	}
+	cout<<"\nworking with theoretical part***/n";
+	printPowerSet(prob, m);
+	cout<<"\n\nworking with simulation part***/n";	
+	for(i=0;i<m;i++)
+	{
+		range[i]=range[i-1]+prob[i];
+	}
+	int ite;
+	cout<<"\nenter seed: ";
+	cin>>seed;
+	cout<<"\nenter ite: ";
+	cin>>ite;
+	srand (static_cast <unsigned> (seed));
+	for(int i=0;i<ite;i++)
+	{
+		unique=0;
+		for(int i=0;i<m;i++)
+		{
+		status[i]=0;
+		}
+		iteration=0;
+
+		while(unique<m)
+		{
+			float random = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+			for(int i=0;i<m;i++)
+			{
+				
+				if(random<=range[i])
+				{
+				if(status[i]==0)
+					unique++;
+				status[i]++;
+				break;
+				}
+				
+			}
+			iteration++;
+		}
+	
+		
+		sum1=sum1+iteration;
+	}
+	avg=float(sum1/ite);
+	cout<<"\n------------------------------------------------\nempirically estimated # of cupons: "<<avg;
+	cout<<"\n------------------------------------------------\n";
+}
